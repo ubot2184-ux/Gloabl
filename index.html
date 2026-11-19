@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Global - Product Catalog</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap');
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family:'Cairo',Arial,sans-serif;
+  background:#888;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  padding:20px;
+  gap:10px;
+}
+
+/* ── TOOLBAR ── */
+.toolbar {
+  width:210mm;
+  background:#1a2744;
+  border-radius:8px;
+  padding:8px 14px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
+}
+.toolbar span { color:#aaa; font-size:11px; }
+.btn {
+  background:#cc2222; color:#fff; border:none; border-radius:5px;
+  padding:5px 14px; font-family:'Cairo',Arial,sans-serif;
+  font-size:11px; font-weight:700; cursor:pointer;
+}
+.btn:hover { background:#a81a1a; }
+
+/* ══════════════════════════════
+   A4 PAGE
+══════════════════════════════ */
+.page {
+  width:210mm;
+  min-height:297mm;
+  background:#fff;
+  position:relative;
+  box-shadow:0 4px 24px rgba(0,0,0,.4);
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+
+/* ══════════════════════════════
+   HEADER — نفس الصورة بالضبط
+══════════════════════════════ */
+.header {
+  background:#1b2a4a;
+  padding:11px 20px 10px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  flex-shrink:0;
+}
+
+/* الشعار */
+.logo-wrap { display:flex; flex-direction:column; gap:1px; }
+.logo-top {
+  display:flex; align-items:center; gap:5px;
+}
+.logo-slashes {
+  display:flex; gap:3px; align-items:center;
+}
+.slash {
+  display:inline-block;
+  width:5px; height:22px;
+  background:#cc2020;
+  transform:skewX(-14deg);
+}
+.slash.s2 { background:#e53030; }
+.logo-wordmark {
+  font-size:30px; font-weight:900; color:#fff;
+  letter-spacing:3px; line-height:1;
+  font-family:'Cairo',Arial,sans-serif;
+}
+.logo-sub {
+  font-size:7.5px; color:#9aa; letter-spacing:2.5px;
+  font-weight:400; padding-right:2px; margin-top:1px;
+}
+
+/* عنوان الكتالوج — يمين */
+.catalog-label {
+  display:flex; align-items:center; gap:10px;
+}
+.cat-divider {
+  width:2.5px; height:38px;
+  background:linear-gradient(180deg,#cc2020 50%,transparent);
+}
+.cat-text { text-align:left; }
+.cat-ar {
+  font-size:14px; font-weight:700; color:#fff;
+  letter-spacing:.5px; line-height:1.3;
+  font-family:'Cairo',Arial,sans-serif;
+  direction:rtl;
+}
+.cat-en {
+  font-size:9px; color:#9aa; letter-spacing:3px;
+  font-weight:400; text-transform:uppercase;
+}
+
+/* ══════════════════════════════
+   PRODUCT GRID 2×2
+══════════════════════════════ */
+.grid {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  padding:12px;
+  flex:1;
+}
+
+/* ══════════════════════════════
+   PRODUCT CARD
+══════════════════════════════ */
+.card {
+  border:1.5px solid #d8d8d8;
+  border-radius:12px;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  background:#fff;
+  position:relative;
+}
+
+/* SKU badge — أحمر في الوسط أعلى */
+.sku-badge {
+  position:absolute;
+  top:10px; left:50%; transform:translateX(-50%);
+  background:#cc2020;
+  color:#fff; font-size:11.5px; font-weight:800;
+  padding:4px 18px;
+  border-radius:5px;
+  letter-spacing:.8px;
+  z-index:4;
+  display:flex; align-items:center; gap:10px;
+  white-space:nowrap;
+  font-family:'Cairo',Arial,sans-serif;
+  min-width:120px;
+  justify-content:center;
+}
+.sku-dot { font-size:5px; opacity:.8; }
+.sku-badge[contenteditable]:focus { outline:2px solid #fff; border-radius:4px; }
+
+/* منطقة الصورة */
+.img-zone {
+  flex:1;
+  display:flex; align-items:center; justify-content:center;
+  background:#f8f8f8;
+  padding:46px 20px 14px;
+  min-height:155px;
+  cursor:pointer;
+  position:relative;
+}
+.img-zone img {
+  max-width:100%; max-height:120px;
+  object-fit:contain; display:block;
+  pointer-events:none;
+}
+.img-zone:hover .replace-hint { opacity:1; }
+.replace-hint {
+  position:absolute; bottom:6px; left:50%; transform:translateX(-50%);
+  background:rgba(26,42,74,.75); color:#fff;
+  font-size:9px; font-weight:700; padding:2px 10px; border-radius:4px;
+  opacity:0; transition:opacity .2s; pointer-events:none; white-space:nowrap;
+}
+.img-zone input[type=file] { display:none; }
+
+/* الخط الفاصل */
+.divider { height:1px; background:#e0e0e0; margin:0 10px; }
+
+/* اسم المنتج */
+.name-block {
+  padding:6px 10px 4px;
+  text-align:center;
+}
+.name-ar {
+  font-size:13px; font-weight:700; color:#1b2a4a;
+  font-family:'Cairo',Arial,sans-serif; line-height:1.3;
+}
+.name-en {
+  font-size:9px; font-weight:600; color:#666;
+  letter-spacing:1.5px; text-transform:uppercase; margin-top:1px;
+}
+.name-ar[contenteditable]:focus,
+.name-en[contenteditable]:focus { outline:1px dashed #cc2020; border-radius:2px; }
+
+/* صف السعر */
+.price-row {
+  display:flex; align-items:center; gap:7px;
+  padding:6px 10px 10px;
+}
+.price-box {
+  flex:1;
+  border:1.5px solid #d0d0d0;
+  border-radius:7px;
+  display:flex; align-items:center; padding:5px 12px; gap:8px;
+}
+.price-num {
+  font-size:26px; font-weight:900; color:#1b2a4a; line-height:1;
+  min-width:22px;
+}
+.price-num[contenteditable]:focus { outline:1px dashed #cc2020; border-radius:2px; }
+.price-labels { display:flex; flex-direction:column; align-items:flex-start; }
+.price-labels .p-ar { font-size:11px; font-weight:700; color:#1b2a4a; }
+.price-labels .p-en { font-size:8px; color:#999; letter-spacing:1px; }
+.tag-btn {
+  background:#1b2a4a; border-radius:7px;
+  width:34px; height:34px;
+  display:flex; align-items:center; justify-content:center;
+  color:#fff; font-size:16px; flex-shrink:0;
+  cursor:pointer;
+}
+
+/* ══════════════════════════════
+   PCS STICKER — قابل للسحب
+══════════════════════════════ */
+.pcs-sticker {
+  position:absolute;
+  background:#1b2a4a;
+  color:#fff;
+  border-radius:7px;
+  padding:5px 10px 4px;
+  display:flex; flex-direction:column; align-items:center;
+  cursor:grab;
+  user-select:none;
+  z-index:20;
+  box-shadow:0 2px 10px rgba(0,0,0,.4);
+  min-width:48px;
+  touch-action:none;
+  top:10px; right:10px;
+}
+.pcs-sticker:active { cursor:grabbing; }
+.pcs-lbl { font-size:7px; letter-spacing:2px; font-weight:700; color:#8899bb; line-height:1; margin-bottom:2px; }
+.pcs-val {
+  font-size:17px; font-weight:900; line-height:1;
+  min-width:30px; text-align:center; outline:none;
+}
+.pcs-val:focus { background:rgba(255,255,255,.1); border-radius:3px; }
+
+@media print {
+  body { background:none; padding:0; }
+  .toolbar { display:none; }
+  .page { box-shadow:none; }
+  .replace-hint { display:none; }
+  [contenteditable] { outline:none !important; }
+  .pcs-sticker[data-empty="1"] { display:none; }
+}
+
+/* ══════════════════════════════
+   FOOTER — نفس الصورة
+══════════════════════════════ */
+.footer {
+  background:#1b2a4a;
+  padding:9px 20px;
+  display:flex; align-items:center; justify-content:space-between;
+  flex-shrink:0;
+}
+.footer-left { display:flex; gap:22px; align-items:center; }
+.fbadge { display:flex; align-items:center; gap:7px; }
+.fbadge-icon {
+  width:30px; height:30px;
+  border:1.5px solid #7788aa;
+  border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-size:14px; color:#cdd;
+}
+.fbadge-txt { display:flex; flex-direction:column; }
+.fbadge-ar { font-size:9.5px; font-weight:700; color:#dde; font-family:'Cairo',Arial,sans-serif; }
+.fbadge-en { font-size:7.5px; color:#8899aa; letter-spacing:1px; }
+.footer-right { text-align:left; }
+.footer-ar { font-size:9.5px; font-weight:700; color:#dde; font-family:'Cairo',Arial,sans-serif; }
+.footer-en { font-size:7.5px; color:#8899aa; letter-spacing:.5px; margin-top:1px; }
+</style>
+</head>
+<body>
+
+<div class="toolbar">
+  <span>🖼 اضغط على الصورة لاستبدالها &nbsp;|&nbsp; ✏️ اضغط مرتين على أي نص لتعديله &nbsp;|&nbsp; ✋ اسحب ختم PCS لأي مكان</span>
+  <button class="btn" onclick="window.print()">🖨 طباعة A4</button>
+</div>
+
+<div class="page" id="page">
+
+  <!-- ════ HEADER ════ -->
+  <div class="header">
+    <div class="logo-wrap">
+      <div class="logo-top">
+        <div class="logo-slashes">
+          <span class="slash"></span>
+          <span class="slash s2"></span>
+        </div>
+        <div class="logo-wordmark">GLOBAL</div>
+      </div>
+      <div class="logo-sub">TOP SECURITY LOCK</div>
+    </div>
+    <div class="catalog-label">
+      <div class="cat-divider"></div>
+      <div class="cat-text">
+        <div class="cat-ar">كاتالوج المنتجات</div>
+        <div class="cat-en">PRODUCT CATALOG</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ GRID 2×2 ════ -->
+  <div class="grid">
+
+    <!-- ══ CARD 1 ══ -->
+    <div class="card">
+      <div class="sku-badge" contenteditable="true"><span class="sku-dot">●</span>GLB-0001<span class="sku-dot">●</span></div>
+      <div class="pcs-sticker" data-empty="0"
+           onmousedown="startDrag(event,this)"
+           ontouchstart="startDragTouch(event,this)"
+           onclick="stopProp(event)">
+        <div class="pcs-lbl">PCS</div>
+        <div class="pcs-val" contenteditable="true"
+             onmousedown="stopProp(event)"
+             ontouchstart="stopProp(event)"
+             oninput="checkEmpty(this)">—</div>
+      </div>
+      <div class="img-zone" onclick="pickImg(this)">
+        <img src="https://placehold.co/160x110/f5f5f5/aaaaaa?text=Product" alt="">
+        <div class="replace-hint">📷 استبدل الصورة</div>
+        <input type="file" accept="image/*" onchange="loadImg(event,this)">
+      </div>
+      <div class="divider"></div>
+      <div class="name-block">
+        <div class="name-ar" contenteditable="true">فرشاة دهان 100 ملم</div>
+        <div class="name-en" contenteditable="true">PAINT BRUSH 100MM</div>
+      </div>
+      <div class="price-row">
+        <div class="price-box">
+          <div class="price-num" contenteditable="true">10</div>
+          <div class="price-labels"><span class="p-ar">شيكل</span><span class="p-en">ILS</span></div>
+        </div>
+        <div class="tag-btn">🏷</div>
+      </div>
+    </div>
+
+    <!-- ══ CARD 2 ══ -->
+    <div class="card">
+      <div class="sku-badge" contenteditable="true"><span class="sku-dot">●</span>GLB-0002<span class="sku-dot">●</span></div>
+      <div class="pcs-sticker" data-empty="0"
+           onmousedown="startDrag(event,this)"
+           ontouchstart="startDragTouch(event,this)"
+           onclick="stopProp(event)">
+        <div class="pcs-lbl">PCS</div>
+        <div class="pcs-val" contenteditable="true"
+             onmousedown="stopProp(event)"
+             ontouchstart="stopProp(event)"
+             oninput="checkEmpty(this)">—</div>
+      </div>
+      <div class="img-zone" onclick="pickImg(this)">
+        <img src="https://placehold.co/160x110/f5f5f5/aaaaaa?text=Product" alt="">
+        <div class="replace-hint">📷 استبدل الصورة</div>
+        <input type="file" accept="image/*" onchange="loadImg(event,this)">
+      </div>
+      <div class="divider"></div>
+      <div class="name-block">
+        <div class="name-ar" contenteditable="true">شفرة منشار خشب 7 بوصة</div>
+        <div class="name-en" contenteditable="true">TCT SAW BLADE 7 INCH</div>
+      </div>
+      <div class="price-row">
+        <div class="price-box">
+          <div class="price-num" contenteditable="true">10</div>
+          <div class="price-labels"><span class="p-ar">شيكل</span><span class="p-en">ILS</span></div>
+        </div>
+        <div class="tag-btn">🏷</div>
+      </div>
+    </div>
+
+    <!-- ══ CARD 3 ══ -->
+    <div class="card">
+      <div class="sku-badge" contenteditable="true"><span class="sku-dot">●</span>GLB-0003<span class="sku-dot">●</span></div>
+      <div class="pcs-sticker" data-empty="0"
+           onmousedown="startDrag(event,this)"
+           ontouchstart="startDragTouch(event,this)"
+           onclick="stopProp(event)">
+        <div class="pcs-lbl">PCS</div>
+        <div class="pcs-val" contenteditable="true"
+             onmousedown="stopProp(event)"
+             ontouchstart="stopProp(event)"
+             oninput="checkEmpty(this)">—</div>
+      </div>
+      <div class="img-zone" onclick="pickImg(this)">
+        <img src="https://placehold.co/160x110/f5f5f5/aaaaaa?text=Product" alt="">
+        <div class="replace-hint">📷 استبدل الصورة</div>
+        <input type="file" accept="image/*" onchange="loadImg(event,this)">
+      </div>
+      <div class="divider"></div>
+      <div class="name-block">
+        <div class="name-ar" contenteditable="true">غطاء مرحاض</div>
+        <div class="name-en" contenteditable="true">TOILET SEAT COVER</div>
+      </div>
+      <div class="price-row">
+        <div class="price-box">
+          <div class="price-num" contenteditable="true">10</div>
+          <div class="price-labels"><span class="p-ar">شيكل</span><span class="p-en">ILS</span></div>
+        </div>
+        <div class="tag-btn">🏷</div>
+      </div>
+    </div>
+
+    <!-- ══ CARD 4 ══ -->
+    <div class="card">
+      <div class="sku-badge" contenteditable="true"><span class="sku-dot">●</span>GLB-0004<span class="sku-dot">●</span></div>
+      <div class="pcs-sticker" data-empty="0"
+           onmousedown="startDrag(event,this)"
+           ontouchstart="startDragTouch(event,this)"
+           onclick="stopProp(event)">
+        <div class="pcs-lbl">PCS</div>
+        <div class="pcs-val" contenteditable="true"
+             onmousedown="stopProp(event)"
+             ontouchstart="stopProp(event)"
+             oninput="checkEmpty(this)">—</div>
+      </div>
+      <div class="img-zone" onclick="pickImg(this)">
+        <img src="https://placehold.co/160x110/f5f5f5/aaaaaa?text=Product" alt="">
+        <div class="replace-hint">📷 استبدل الصورة</div>
+        <input type="file" accept="image/*" onchange="loadImg(event,this)">
+      </div>
+      <div class="divider"></div>
+      <div class="name-block">
+        <div class="name-ar" contenteditable="true">قفل باب مع مقبض</div>
+        <div class="name-en" contenteditable="true">DOOR LOCK WITH HANDLE</div>
+      </div>
+      <div class="price-row">
+        <div class="price-box">
+          <div class="price-num" contenteditable="true">10</div>
+          <div class="price-labels"><span class="p-ar">شيكل</span><span class="p-en">ILS</span></div>
+        </div>
+        <div class="tag-btn">🏷</div>
+      </div>
+    </div>
+
+  </div><!-- /grid -->
+
+  <!-- ════ FOOTER ════ -->
+  <div class="footer">
+    <div class="footer-left">
+      <div class="fbadge">
+        <div class="fbadge-icon">🏅</div>
+        <div class="fbadge-txt">
+          <span class="fbadge-ar">جودة عاليـة</span>
+          <span class="fbadge-en">HIGH QUALITY</span>
+        </div>
+      </div>
+      <div class="fbadge">
+        <div class="fbadge-icon">🛡</div>
+        <div class="fbadge-txt">
+          <span class="fbadge-ar">أمــان يدوم</span>
+          <span class="fbadge-en">SECURITY FOREVER</span>
+        </div>
+      </div>
+    </div>
+    <div class="footer-right">
+      <div class="footer-ar">اختيارك الأفضل للجودة والأمان</div>
+      <div class="footer-en">YOUR BEST CHOICE FOR QUALITY &amp; SECURITY</div>
+    </div>
+  </div>
+
+</div><!-- /page -->
+
+<script>
+/* ── صورة ── */
+function pickImg(zone) { zone.querySelector('input[type=file]').click(); }
+function loadImg(e, inp) {
+  const f = e.target.files[0]; if (!f) return;
+  const r = new FileReader();
+  r.onload = ev => inp.closest('.img-zone').querySelector('img').src = ev.target.result;
+  r.readAsDataURL(f);
+}
+
+/* ── PCS فارغ أو لا ── */
+function checkEmpty(el) {
+  const v = el.textContent.trim();
+  el.closest('.pcs-sticker').dataset.empty = (!v || v === '—') ? '1' : '0';
+}
+
+/* ── توقف النشر ── */
+function stopProp(e) { e.stopPropagation(); }
+
+/* ── drag mouse ── */
+let drag = null, ox = 0, oy = 0;
+
+function startDrag(e, el) {
+  if (e.target.classList.contains('pcs-val')) return;
+  e.preventDefault(); e.stopPropagation();
+  drag = el;
+  const r = el.getBoundingClientRect();
+  ox = e.clientX - r.left;
+  oy = e.clientY - r.top;
+}
+
+document.addEventListener('mousemove', e => {
+  if (!drag) return;
+  const pr = drag.offsetParent.getBoundingClientRect();
+  let x = e.clientX - pr.left - ox;
+  let y = e.clientY - pr.top  - oy;
+  x = Math.max(0, Math.min(x, drag.offsetParent.offsetWidth  - drag.offsetWidth));
+  y = Math.max(0, Math.min(y, drag.offsetParent.offsetHeight - drag.offsetHeight));
+  drag.style.left = x+'px'; drag.style.top = y+'px';
+  drag.style.right = 'auto'; drag.style.bottom = 'auto';
+});
+document.addEventListener('mouseup', () => { drag = null; });
+
+/* ── drag touch ── */
+function startDragTouch(e, el) {
+  if (e.target.classList.contains('pcs-val')) return;
+  e.stopPropagation();
+  drag = el;
+  const t = e.touches[0], r = el.getBoundingClientRect();
+  ox = t.clientX - r.left; oy = t.clientY - r.top;
+}
+document.addEventListener('touchmove', e => {
+  if (!drag) return;
+  e.preventDefault();
+  const t = e.touches[0], pr = drag.offsetParent.getBoundingClientRect();
+  let x = t.clientX - pr.left - ox;
+  let y = t.clientY - pr.top  - oy;
+  x = Math.max(0, Math.min(x, drag.offsetParent.offsetWidth  - drag.offsetWidth));
+  y = Math.max(0, Math.min(y, drag.offsetParent.offsetHeight - drag.offsetHeight));
+  drag.style.left = x+'px'; drag.style.top = y+'px';
+  drag.style.right = 'auto'; drag.style.bottom = 'auto';
+}, { passive:false });
+document.addEventListener('touchend', () => { drag = null; });
+</script>
+</body>
+</html>
